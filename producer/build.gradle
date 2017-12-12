@@ -20,22 +20,17 @@ apply plugin: 'io.spring.dependency-management'
 apply plugin: 'docker'
 
 group = 'andreformento'
-version = 'latest'
 sourceCompatibility = 1.8
 
-jar {
-    baseName = 'hello-kafka'
-}
-
 task copyJar(type: Copy) {
-    from        "build/libs/" + jar.baseName + ".jar"
+    from        "build/libs/" + rootProject.name + ".jar"
     into        'build/docker'
 }
 
 task buildDocker(type: Docker, dependsOn: build) {
     dependsOn copyJar
     push = false
-    applicationName = jar.baseName
+    applicationName = "andreformento/" + rootProject.name
     dockerfile = file('src/main/docker/Dockerfile')
     doFirst {
         copy {
