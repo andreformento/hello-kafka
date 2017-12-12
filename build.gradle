@@ -1,40 +1,42 @@
-// https://docs.gradle.org/current/userguide/multi_project_builds.html
-allprojects {
-	buildscript {
-		ext {
-			springBootVersion = '2.0.0.M7'
-		}
-		repositories {
-			mavenCentral()
-			maven { url "https://repo.spring.io/snapshot" }
-			maven { url "https://repo.spring.io/milestone" }
-		}
-		dependencies {
-			classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-			classpath('se.transmode.gradle:gradle-docker:1.2')
-		}
+// https://rominirani.com/gradle-tutorial-part-3-multiple-java-projects-5b1c4d1fbd8d
+
+buildscript {
+	ext {
+		springBootVersion = '2.0.0.M7'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath('se.transmode.gradle:gradle-docker:1.2')
+	}
+}
+
+group = 'andreformento'
+
+apply plugin: 'java'
+apply plugin: 'docker'
+
+subprojects {
+  	// Put instructions for each sub project
+	task copyJar(type: Copy) {
+		from        "$buildDir/libs/" + project.name + ".jar"
+		into        "$buildDir/docker"
 	}
 
-    apply plugin: 'java'
-	apply plugin: 'docker'
-
-    group = 'andreformento'
-}
-
-task copyJar(type: Copy) {
-    from        "$buildDir/libs/" + rootProject.name + ".jar"
-    into        "$buildDir/docker"
-}
-
-task buildDocker(type: Docker, dependsOn: build) {
-    dependsOn copyJar
-    push = false
-    applicationName = "andreformento/" + rootProject.name
-    dockerfile = file("$buildDir/src/main/docker/Dockerfile")
-    doFirst {
-        copy {
-            from jar
-            into stageDir
-        }
-    }
+	task buildDocker(type: Docker, dependsOn: build) {
+		dependsOn copyJar
+		push = false
+		applicationName = "andreformento/${project.name}"
+		println "blaaaaah ${project.name}"
+		dockerfile = file("${projectDir}/src/main/docker/Dockerfile")
+		doFirst {
+			copy {
+				from jar
+				into stageDir
+			}
+		}
+	}
 }
