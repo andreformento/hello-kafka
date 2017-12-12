@@ -1,0 +1,7 @@
+server:
+  port: 8082
+
+kafka:
+  bootstrap: localhost:9092
+  group: WorkUnitApp
+  topic: workunits
